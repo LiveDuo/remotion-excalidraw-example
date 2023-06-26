@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { getBeginTimeList } from "./animate";
 
-const getCombinedBeginTimeList = (svgList: Props["svgList"]) => {
+const getCombinedBeginTimeList = (svgList: ToolbarProps["svgList"]) => {
   const beginTimeList = ([] as number[]).concat(
     ...svgList.map(({ svg }) =>
       getBeginTimeList(svg).map((n) => Math.floor(n / 100) * 100)
@@ -11,14 +11,14 @@ const getCombinedBeginTimeList = (svgList: Props["svgList"]) => {
   return [...new Set(beginTimeList)].sort((a, b) => a - b);
 };
 
-interface SvgList { svg: SVGSVGElement; finishedMs: number; }
-
-type Props = {
-  svgList: SvgList[];
-};
-
-const Toolbar: React.FC<Props> = ({ svgList }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ svgList }) => {
   const [paused, setPaused] = useState(false);
+
+  // pause animations
+  const togglePausedAnimations = useCallback(() => {
+    if (!svgList.length) return;
+    setPaused((p) => !p);
+  }, [svgList]);
 
   useEffect(() => {
     svgList.forEach(({ svg }) => {
@@ -30,11 +30,7 @@ const Toolbar: React.FC<Props> = ({ svgList }) => {
     });
   }, [svgList, paused]);
 
-  const togglePausedAnimations = useCallback(() => {
-    if (!svgList.length) return;
-    setPaused((p) => !p);
-  }, [svgList]);
-
+  // step animations
   const timer = useRef<NodeJS.Timeout>();
   const stepForwardAnimations = useCallback(() => {
     if (!svgList.length) return;
@@ -55,6 +51,7 @@ const Toolbar: React.FC<Props> = ({ svgList }) => {
     }, nextTime - currentTime);
   }, [svgList]);
 
+  // reset animations
   const resetAnimations = useCallback(() => {
     svgList.forEach(({ svg }) => {
       svg.setCurrentTime(0);

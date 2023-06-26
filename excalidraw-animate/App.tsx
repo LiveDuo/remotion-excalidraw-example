@@ -2,21 +2,27 @@ import React, { useEffect, useState } from "react";
 
 import Toolbar from "./Toolbar";
 import Viewer from "./Viewer";
-import { loadDataList } from "./load";
+
+import { exportToSvg, } from "@excalidraw/excalidraw";
+
+import type { NonDeletedExcalidrawElement, } from "@excalidraw/excalidraw/types/element/types";
+
+import { animateSvg } from "./animate";
 
 import example from "./example.json";
 
-import { exportToSvg, } from "@excalidraw/excalidraw";
-import type { BinaryFiles } from "@excalidraw/excalidraw/types/types";
-import type { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
-
-interface DataList {
-  elements: readonly ExcalidrawElement[];
-  appState: Parameters<typeof exportToSvg>[0]["appState"];
-  files: BinaryFiles;
+const loadDataList = async (dataList: DataList[]) => {
+  const svgList = await Promise.all(
+    dataList.map(async (data) => {
+      const elements = data.elements.filter((e): e is NonDeletedExcalidrawElement => !e.isDeleted);
+      const exportOptions = { elements, files: data.files, appState: data.appState, exportPadding: 30, }
+      const svg = await exportToSvg(exportOptions);
+      const result = animateSvg(svg, elements, {});
+      return { svg, finishedMs: result.finishedMs };
+    })
+  );
+  return svgList;
 }
-
-interface SvgList { svg: SVGSVGElement; finishedMs: number; }
 
 const App: React.FC = () => {
 

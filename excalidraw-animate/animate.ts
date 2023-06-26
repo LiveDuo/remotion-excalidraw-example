@@ -6,13 +6,6 @@ import type {
 
 import { getFreeDrawSvgPath } from "@excalidraw/excalidraw";
 
-type AnimateOptions = {
-  startMs?: number;
-  pointerImg?: string;
-  pointerWidth?: string;
-  pointerHeight?: string;
-};
-
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 const findNode = (ele: SVGElement, name: string) => {

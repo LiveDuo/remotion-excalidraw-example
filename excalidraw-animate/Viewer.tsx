@@ -1,13 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-type Props = {
-  svgList: {
-    svg: SVGSVGElement;
-    finishedMs: number;
-  }[];
-};
-
-const Viewer: React.FC<Props> = ({ svgList }) => {
+const Viewer: React.FC<ViewerProps> = ({ svgList }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
