@@ -7,7 +7,6 @@ interface DataList {
 interface SvgList { svg: SVGSVGElement; finishedMs: number; }
 
 // props
-type ViewerProps = { svgList: SvgList[]; };
 type ToolbarProps = { svgList: SvgList[]; };
 
 // params

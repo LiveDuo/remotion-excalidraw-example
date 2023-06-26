@@ -11,9 +11,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const findNode = (ele: SVGElement, name: string) => {
   const childNodes = ele.childNodes as NodeListOf<SVGElement>;
   for (let i = 0; i < childNodes.length; ++i) {
-    if (childNodes[i].tagName === name) {
-      return childNodes[i];
-    }
+    if (childNodes[i].tagName === name) return childNodes[i];
   }
   return null;
 };

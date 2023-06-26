@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
-
-import Toolbar from "./Toolbar";
-import Viewer from "./Viewer";
-
-import { exportToSvg, } from "@excalidraw/excalidraw";
+import React, { useEffect, useState, useRef } from "react";
 
 import type { NonDeletedExcalidrawElement, } from "@excalidraw/excalidraw/types/element/types";
+import { exportToSvg, } from "@excalidraw/excalidraw";
+
+import Toolbar from "./Toolbar";
 
 import { animateSvg } from "./animate";
 
@@ -26,7 +24,23 @@ const loadDataList = async (dataList: DataList[]) => {
 
 const App: React.FC = () => {
 
-  const [loadedSvgList, setLoadedSvgList] = useState<SvgList[]>([]);
+  const [svgList, setLoadedSvgList] = useState<SvgList[]>([]);
+
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // append svgs
+    svgList.forEach(({ svg }) => {
+      svg.style.width = '100%'
+      svg.style.height = '100%'
+      if (ref.current) {
+        ref.current.appendChild(svg);
+      }
+    });
+
+    // cleanup
+    return () => svgList.forEach(({ svg }) => svg.remove());;
+  }, [svgList]);
 
   useEffect(() => {
     (async () => {
@@ -37,8 +51,8 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <Toolbar svgList={loadedSvgList} />
-      <Viewer svgList={loadedSvgList} />
+      <Toolbar svgList={svgList} />
+      <div style={{ height: '100vh' }} ref={ref}></div>;
     </div>
   );
 };
