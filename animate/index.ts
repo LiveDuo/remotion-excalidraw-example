@@ -20,7 +20,7 @@ export const resetAnimation = (SvgItem: SvgItem) => {
 }
 
 export const loadData = async () => {
-  const data = example as DataList;
+  const data = example as ExcalidrawJson;
   const elements = data.elements.filter((e): e is NonDeletedExcalidrawElement => !e.isDeleted);
   const exportOptions = { elements, files: data.files, appState: data.appState, exportPadding: 30, }
   const svg = await exportToSvg(exportOptions);
