@@ -1,7 +1,7 @@
 import { CSSProperties } from 'react'
 
 import { AbsoluteFill, Sequence } from 'remotion'
-import Canvas from '../animate/Canvas'
+import Canvas from './Canvas'
 
 const containerOptions: CSSProperties = {margin: '40px', justifyContent: 'center', alignItems: 'center'}
 
