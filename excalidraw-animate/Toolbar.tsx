@@ -1,12 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { exportToSvg, } from "@excalidraw/excalidraw";
-import type { BinaryFiles } from "@excalidraw/excalidraw/types/types";
-import type { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
-
 import { getBeginTimeList } from "./animate";
-
-import example from "./example.json";
 
 const getCombinedBeginTimeList = (svgList: Props["svgList"]) => {
   const beginTimeList = ([] as number[]).concat(
@@ -17,21 +11,13 @@ const getCombinedBeginTimeList = (svgList: Props["svgList"]) => {
   return [...new Set(beginTimeList)].sort((a, b) => a - b);
 };
 
-interface DataList {
-  elements: readonly ExcalidrawElement[];
-  appState: Parameters<typeof exportToSvg>[0]["appState"];
-  files: BinaryFiles;
-}
-
 interface SvgList { svg: SVGSVGElement; finishedMs: number; }
 
 type Props = {
   svgList: SvgList[];
-  loadDataList: (data: DataList[]) => void;
 };
 
-const Toolbar: React.FC<Props> = ({ svgList, loadDataList }) => {
-  const [showToolbar, setShowToolbar] = useState<boolean | "never">(false);
+const Toolbar: React.FC<Props> = ({ svgList }) => {
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
@@ -44,30 +30,18 @@ const Toolbar: React.FC<Props> = ({ svgList, loadDataList }) => {
     });
   }, [svgList, paused]);
 
-  useEffect(() => {
-    loadDataList([example as DataList]);
-  }, []);
-
   const togglePausedAnimations = useCallback(() => {
-    if (!svgList.length) {
-      return;
-    }
+    if (!svgList.length) return;
     setPaused((p) => !p);
   }, [svgList]);
 
   const timer = useRef<NodeJS.Timeout>();
   const stepForwardAnimations = useCallback(() => {
-    if (!svgList.length) {
-      return;
-    }
+    if (!svgList.length) return;
     const beginTimeList = getCombinedBeginTimeList(svgList);
     const currentTime = svgList[0].svg.getCurrentTime() * 1000;
     let nextTime = beginTimeList.find((t) => t > currentTime + 50);
-    if (nextTime) {
-      nextTime -= 1;
-    } else {
-      nextTime = currentTime + 500;
-    }
+    nextTime = nextTime ? -1 : currentTime + 500;
     clearTimeout(timer.current as NodeJS.Timeout);
     svgList.forEach(({ svg }) => {
       svg.unpauseAnimations();
@@ -86,22 +60,6 @@ const Toolbar: React.FC<Props> = ({ svgList, loadDataList }) => {
       svg.setCurrentTime(0);
     });
   }, [svgList]);
-
-  useEffect(() => {
-    const onKeydown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === "p") {
-        togglePausedAnimations();
-      } else if (e.key.toLowerCase() === "s") {
-        stepForwardAnimations();
-      } else if (e.key.toLowerCase() === "r") {
-        resetAnimations();
-      }
-    };
-    document.addEventListener("keydown", onKeydown);
-    return () => {
-      document.removeEventListener("keydown", onKeydown);
-    };
-  }, [togglePausedAnimations, stepForwardAnimations, resetAnimations]);
 
   return (
     <div>
