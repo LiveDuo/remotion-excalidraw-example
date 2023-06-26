@@ -4,10 +4,7 @@ interface DataList {
     appState: Parameters<typeof exportToSvg>[0]["appState"];
     files: BinaryFiles;
 }
-interface SvgList { svg: SVGSVGElement; finishedMs: number; }
-
-// props
-type ToolbarProps = { svgList: SvgList[]; };
+interface SvgItem { svg: SVGSVGElement; finishedMs: number; }
 
 // params
 type AnimateOptions = {

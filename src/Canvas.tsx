@@ -1,35 +1,29 @@
 import React, { useEffect, useState, useRef } from "react";
 
-import { resetAnimations, stepForwardAnimations, togglePausedAnimations } from "../animate";
-import { loadDataList, appendAnimationsToRef, removeAnimationsFromList } from "../animate";
+import { resetAnimation, stepAnimation, toggleAnimation } from "../animate";
+import { loadData, appendElement, removeElement } from "../animate";
 
 const Canvas: React.FC = () => {
 
-  const [svgList, setLoadedSvgList] = useState<SvgList[]>([]);
-
+  const [svg, setSvg] = useState<SvgItem>();
+  const [paused, setPaused] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    appendAnimationsToRef(svgList, ref?.current!)
-    return () => removeAnimationsFromList(svgList);
-  }, [svgList]);
-
-  useEffect(() => {
-    (async () => {
-      const svgList = await loadDataList();
-      setLoadedSvgList(svgList)
-    })()
+    loadData().then(l => setSvg(l))
   }, []);
 
-  const timer = useRef<NodeJS.Timeout>();
-  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (svg) appendElement(svg!, ref?.current!)
+    return () => removeElement(svg!);
+  }, [svg]);
 
   return (
     <div>
       <div>
-        <button type="button" onClick={() => togglePausedAnimations(svgList, paused, setPaused)}>{paused ? "Play" : "Pause"}</button>
-        <button type="button" onClick={() => stepForwardAnimations(svgList, timer?.current!, setPaused)}>Step</button>
-        <button type="button" onClick={() => resetAnimations(svgList)}>Reset</button>
+        <button type="button" onClick={() => {toggleAnimation(svg!, paused); setPaused(p => !p)}}>{paused ? "Play" : "Pause"}</button>
+        <button type="button" onClick={() => {stepAnimation(svg!); setPaused(true)}}>Step</button>
+        <button type="button" onClick={() => resetAnimation(svg!)}>Reset</button>
       </div>
       <div style={{ height: '100vh' }} ref={ref}></div>;
     </div>
