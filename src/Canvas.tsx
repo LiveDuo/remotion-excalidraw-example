@@ -27,9 +27,9 @@ const Canvas: React.FC = () => {
   return (
     <div>
       <div>
-        <button type="button" onClick={() => togglePausedAnimations(svgList, paused, setPaused)}>{paused ? "Play (P)" : "Pause (P)"}</button>
-        <button type="button" onClick={() => stepForwardAnimations(svgList, timer?.current!, setPaused)}>Step (S)</button>
-        <button type="button" onClick={() => resetAnimations(svgList)}>Reset (R)</button>
+        <button type="button" onClick={() => togglePausedAnimations(svgList, paused, setPaused)}>{paused ? "Play" : "Pause"}</button>
+        <button type="button" onClick={() => stepForwardAnimations(svgList, timer?.current!, setPaused)}>Step</button>
+        <button type="button" onClick={() => resetAnimations(svgList)}>Reset</button>
       </div>
       <div style={{ height: '100vh' }} ref={ref}></div>;
     </div>

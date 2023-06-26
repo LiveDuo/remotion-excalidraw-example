@@ -8,14 +8,6 @@ import { getFreeDrawSvgPath } from "@excalidraw/excalidraw";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-const findNode = (ele: SVGElement, name: string) => {
-  const childNodes = ele.childNodes as NodeListOf<SVGElement>;
-  for (let i = 0; i < childNodes.length; ++i) {
-    if (childNodes[i].tagName === name) return childNodes[i];
-  }
-  return null;
-};
-
 const hideBeforeAnimation = (
   svg: SVGSVGElement,
   ele: SVGElement,
@@ -184,7 +176,6 @@ const animatePolygon = (
     mCount = dTo.match(/M/g)?.length || 0;
     cCount = dTo.match(/C/g)?.length || 0;
   }
-  if (mCount !== cCount) throw new Error("unexpected m/c counts");
   const dups = ele.getAttribute("stroke-dasharray") ? 1 : Math.min(2, mCount);
   const repeat = mCount / dups;
   let dLast = dTo;
@@ -293,7 +284,9 @@ const animateText = (
   textPath.setAttribute("href", "#pathForText" + pathForTextIndex);
   textPath.textContent = ele.textContent;
   ele.textContent = " "; // HACK for Firebox as `null` does not work
-  findNode(svg, "defs")?.appendChild(path);
+
+  const node = Array.from(svg.childNodes as NodeListOf<SVGElement>).find(c => c.tagName === "defs")
+  node?.appendChild(path);
   ele.appendChild(textPath);
   animatePointer(
     svg,
@@ -606,11 +599,6 @@ const createGroups = (
   return groups;
 };
 
-const filterGroupNodes = (nodes: NodeListOf<SVGElement>) =>
-  [...nodes].filter(
-    (node) => node.tagName === "g" || node.tagName === "use" /* for images */
-  );
-
 const extractNumberFromElement = (
   element: NonDeletedExcalidrawElement,
   key: string
@@ -619,17 +607,8 @@ const extractNumberFromElement = (
   return (match && Number(match[1])) || 0;
 };
 
-const sortSvgNodes = (
-  nodes: SVGElement[],
-  elements: readonly NonDeletedExcalidrawElement[]
-) =>
-  [...nodes].sort((a, b) => {
-    const aIndex = nodes.indexOf(a);
-    const bIndex = nodes.indexOf(b);
-    const aOrder = extractNumberFromElement(elements[aIndex], "animateOrder");
-    const bOrder = extractNumberFromElement(elements[bIndex], "animateOrder");
-    return aOrder - bOrder;
-  });
+const groupDur = 5000;
+const individualDur = 500;
 
 export const animateSvg = (
   svg: SVGSVGElement,
@@ -640,16 +619,14 @@ export const animateSvg = (
   const groups = createGroups(svg, elements);
   const finished = new Map();
   let current = options.startMs ?? 1000; // 1 sec margin
-  const groupDur = 5000;
-  const individualDur = 500;
-  const groupNodes = filterGroupNodes(svg.childNodes as NodeListOf<SVGElement>);
-  if (groupNodes.length !== elements.length) {
-    throw new Error("element length mismatch");
-  }
+
+  const nodes = svg.childNodes as NodeListOf<SVGElement>
+  const groupNodes = [...nodes].filter((n) => n.tagName === "g" || n.tagName === "use");
+
   const groupElement2Element = new Map(
     groupNodes.map((ele, index) => [ele, elements[index]])
   );
-  sortSvgNodes(groupNodes, elements).forEach((ele) => {
+  groupNodes.forEach((ele) => {
     const element = groupElement2Element.get(
       ele
     ) as NonDeletedExcalidrawElement;
