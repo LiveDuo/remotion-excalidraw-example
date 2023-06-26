@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 import { getBeginTimeList } from "./animate";
 
@@ -16,24 +16,21 @@ const Toolbar: React.FC<ToolbarProps> = ({ svgList }) => {
 
   // pause animations
   const togglePausedAnimations = useCallback(() => {
-    if (!svgList.length) return;
-    setPaused((p) => !p);
-  }, [svgList]);
 
-  useEffect(() => {
     svgList.forEach(({ svg }) => {
-      if (paused) {
+      if (!paused) {
         svg.pauseAnimations();
       } else {
         svg.unpauseAnimations();
       }
     });
+
+    setPaused((p) => !p);
   }, [svgList, paused]);
 
   // step animations
   const timer = useRef<NodeJS.Timeout>();
   const stepForwardAnimations = useCallback(() => {
-    if (!svgList.length) return;
     const beginTimeList = getCombinedBeginTimeList(svgList);
     const currentTime = svgList[0].svg.getCurrentTime() * 1000;
     let nextTime = beginTimeList.find((t) => t > currentTime + 50);
@@ -60,19 +57,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ svgList }) => {
 
   return (
     <div>
-      {!!svgList.length && (
-        <div>
-          <button type="button" onClick={togglePausedAnimations}>
-            {paused ? "Play (P)" : "Pause (P)"}
-          </button>
-          <button type="button" onClick={stepForwardAnimations}>
-            Step (S)
-          </button>
-          <button type="button" onClick={resetAnimations}>
-            Reset (R)
-          </button>
-        </div>
-      )}
+      <button type="button" onClick={togglePausedAnimations}>{paused ? "Play (P)" : "Pause (P)"}</button>
+      <button type="button" onClick={stepForwardAnimations}>Step (S)</button>
+      <button type="button" onClick={resetAnimations}>Reset (R)</button>
     </div>
   );
 };

@@ -16,3 +16,8 @@ type AnimateOptions = {
     pointerWidth?: string;
     pointerHeight?: string;
 };
+
+declare module "*.excalidraw" {
+    const value: object;
+    export default value;
+}
