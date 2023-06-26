@@ -1,18 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { fileOpen } from "browser-fs-access";
 
-import { exportToSvg, loadFromBlob, } from "@excalidraw/excalidraw";
+import { exportToSvg, } from "@excalidraw/excalidraw";
 import type { BinaryFiles } from "@excalidraw/excalidraw/types/types";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 
 import { getBeginTimeList } from "./animate";
 
-const loadFromJSON = async () => {
-  const blob = await fileOpen({
-    description: "Excalidraw files",
-  });
-  return loadFromBlob(blob, null, null);
-};
+import example from "./example.json";
 
 const getCombinedBeginTimeList = (svgList: Props["svgList"]) => {
   const beginTimeList = ([] as number[]).concat(
@@ -23,18 +17,17 @@ const getCombinedBeginTimeList = (svgList: Props["svgList"]) => {
   return [...new Set(beginTimeList)].sort((a, b) => a - b);
 };
 
+interface DataList {
+  elements: readonly ExcalidrawElement[];
+  appState: Parameters<typeof exportToSvg>[0]["appState"];
+  files: BinaryFiles;
+}
+
+interface SvgList { svg: SVGSVGElement; finishedMs: number; }
+
 type Props = {
-  svgList: {
-    svg: SVGSVGElement;
-    finishedMs: number;
-  }[];
-  loadDataList: (
-    data: {
-      elements: readonly ExcalidrawElement[];
-      appState: Parameters<typeof exportToSvg>[0]["appState"];
-      files: BinaryFiles;
-    }[]
-  ) => void;
+  svgList: SvgList[];
+  loadDataList: (data: DataList[]) => void;
 };
 
 const Toolbar: React.FC<Props> = ({ svgList, loadDataList }) => {
@@ -52,19 +45,8 @@ const Toolbar: React.FC<Props> = ({ svgList, loadDataList }) => {
   }, [svgList, paused]);
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    const searchParams = new URLSearchParams(hash);
-    if (searchParams.get("toolbar") !== "no") {
-      setShowToolbar(true);
-    } else {
-      setShowToolbar("never");
-    }
+    loadDataList([example as DataList]);
   }, []);
-
-  const loadFile = async () => {
-    const data = await loadFromJSON();
-    loadDataList([data]);
-  };
 
   const togglePausedAnimations = useCallback(() => {
     if (!svgList.length) {
@@ -113,12 +95,6 @@ const Toolbar: React.FC<Props> = ({ svgList, loadDataList }) => {
         stepForwardAnimations();
       } else if (e.key.toLowerCase() === "r") {
         resetAnimations();
-      } else if (e.key.toLowerCase() === "q") {
-        // toggle toolbar
-        setShowToolbar((s) => (typeof s === "boolean" ? !s : s));
-      } else {
-        // show toolbar otherwise
-        setShowToolbar((s) => (typeof s === "boolean" ? true : s));
       }
     };
     document.addEventListener("keydown", onKeydown);
@@ -127,19 +103,10 @@ const Toolbar: React.FC<Props> = ({ svgList, loadDataList }) => {
     };
   }, [togglePausedAnimations, stepForwardAnimations, resetAnimations]);
 
-  if (showToolbar !== true) {
-    return null;
-  }
-
   return (
-    <div className="Toolbar">
-      <div className="Toolbar-loader">
-        <button type="button" onClick={loadFile}>
-          Load File
-        </button>
-      </div>
+    <div>
       {!!svgList.length && (
-        <div className="Toolbar-controller">
+        <div>
           <button type="button" onClick={togglePausedAnimations}>
             {paused ? "Play (P)" : "Pause (P)"}
           </button>

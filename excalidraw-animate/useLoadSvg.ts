@@ -1,8 +1,6 @@
 import { useCallback, useState } from "react";
 
-import {
-  exportToSvg,
-} from "@excalidraw/excalidraw";
+import { exportToSvg, } from "@excalidraw/excalidraw";
 
 import type { BinaryFiles } from "@excalidraw/excalidraw/types/types";
 import type {
@@ -12,20 +10,10 @@ import type {
 
 import { animateSvg } from "./animate";
 
-const getNonDeletedElements = (
-  elements: readonly ExcalidrawElement[]
-): NonDeletedExcalidrawElement[] =>
-  elements.filter(
-    (element): element is NonDeletedExcalidrawElement => !element.isDeleted
-  );
+interface SvgList { svg: SVGSVGElement; finishedMs: number; }
 
 export const useLoadSvg = () => {
-  const [loadedSvgList, setLoadedSvgList] = useState<
-    {
-      svg: SVGSVGElement;
-      finishedMs: number;
-    }[]
-  >([]);
+  const [loadedSvgList, setLoadedSvgList] = useState<SvgList[]>([]);
 
   const loadDataList = useCallback(
     async (
@@ -37,13 +25,9 @@ export const useLoadSvg = () => {
     ) => {
       const svgList = await Promise.all(
         dataList.map(async (data) => {
-          const elements = getNonDeletedElements(data.elements);
-          const svg = await exportToSvg({
-            elements,
-            files: data.files,
-            appState: data.appState,
-            exportPadding: 30,
-          });
+          const elements = data.elements.filter((e): e is NonDeletedExcalidrawElement => !e.isDeleted);
+          const exportOptions = { elements, files: data.files, appState: data.appState, exportPadding: 30, }
+          const svg = await exportToSvg(exportOptions);
           const result = animateSvg(svg, elements, {});
           return { svg, finishedMs: result.finishedMs };
         })

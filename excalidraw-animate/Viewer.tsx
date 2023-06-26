@@ -19,25 +19,12 @@ const Viewer: React.FC<Props> = ({ svgList }) => {
       }
     });
     return () => {
-      svgList.forEach(({ svg }) => {
-        svg.remove();
-      });
+      svgList.forEach(({ svg }) => svg.remove());
     };
   }, [svgList]);
 
-  const repeat = Math.ceil(Math.sqrt(svgList.length));
-  const grids = `repeat(${repeat}, ${100 / repeat}%)`;
-
   return (
-    <div
-      className="Viewer"
-      style={{
-        height: '100vh',
-        gridTemplateColumns: grids,
-        gridTemplateRows: grids,
-      }}
-      ref={ref}
-    ></div>
+    <div style={{ height: '100vh' }} ref={ref}></div>
   );
 };
 
