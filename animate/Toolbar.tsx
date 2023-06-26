@@ -1,6 +1,39 @@
 import React, { useCallback, useRef, useState } from "react";
 
-import { getBeginTimeList } from "./animate";
+const findAnimate = (ele: SVGElement, tmpTimeList: number[]) => {
+  if (ele.tagName === "animate") {
+    const match = /([0-9.]+)ms/.exec(ele.getAttribute("begin") || "");
+    if (match) {
+      tmpTimeList.push(Number(match[1]));
+    }
+  }
+  (ele.childNodes as NodeListOf<SVGElement>).forEach((ele) => {
+    findAnimate(ele, tmpTimeList);
+  });
+};
+
+const getBeginTimeList = (svg: SVGSVGElement) => {
+  const beginTimeList: number[] = [];
+  const tmpTimeList: number[] = [];
+  (svg.childNodes as NodeListOf<SVGElement>).forEach((ele) => {
+    if (ele.tagName === "g") {
+      findAnimate(ele, tmpTimeList);
+      if (tmpTimeList.length) {
+        beginTimeList.push(Math.min(...tmpTimeList));
+        tmpTimeList.splice(0);
+      }
+    } else if (ele.tagName === "defs") {
+      (ele.childNodes as NodeListOf<SVGElement>).forEach((ele) => {
+        findAnimate(ele, tmpTimeList);
+        if (tmpTimeList.length) {
+          beginTimeList.push(Math.min(...tmpTimeList));
+          tmpTimeList.splice(0);
+        }
+      });
+    }
+  });
+  return beginTimeList;
+};
 
 const getCombinedBeginTimeList = (svgList: ToolbarProps["svgList"]) => {
   const beginTimeList = ([] as number[]).concat(

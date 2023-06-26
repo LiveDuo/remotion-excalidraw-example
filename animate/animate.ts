@@ -695,36 +695,3 @@ export const animateSvg = (
   return { finishedMs };
 };
 
-export const getBeginTimeList = (svg: SVGSVGElement) => {
-  const beginTimeList: number[] = [];
-  const tmpTimeList: number[] = [];
-  const findAnimate = (ele: SVGElement) => {
-    if (ele.tagName === "animate") {
-      const match = /([0-9.]+)ms/.exec(ele.getAttribute("begin") || "");
-      if (match) {
-        tmpTimeList.push(Number(match[1]));
-      }
-    }
-    (ele.childNodes as NodeListOf<SVGElement>).forEach((ele) => {
-      findAnimate(ele);
-    });
-  };
-  (svg.childNodes as NodeListOf<SVGElement>).forEach((ele) => {
-    if (ele.tagName === "g") {
-      findAnimate(ele);
-      if (tmpTimeList.length) {
-        beginTimeList.push(Math.min(...tmpTimeList));
-        tmpTimeList.splice(0);
-      }
-    } else if (ele.tagName === "defs") {
-      (ele.childNodes as NodeListOf<SVGElement>).forEach((ele) => {
-        findAnimate(ele);
-        if (tmpTimeList.length) {
-          beginTimeList.push(Math.min(...tmpTimeList));
-          tmpTimeList.splice(0);
-        }
-      });
-    }
-  });
-  return beginTimeList;
-};

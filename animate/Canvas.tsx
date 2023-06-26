@@ -7,7 +7,7 @@ import Toolbar from "./Toolbar";
 
 import { animateSvg } from "./animate";
 
-import example from "./example.excalidraw";
+import example from "../data/example.excalidraw";
 
 const loadDataList = async (dataList: DataList[]) => {
   const svgList = await Promise.all(
