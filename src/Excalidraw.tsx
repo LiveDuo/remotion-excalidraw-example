@@ -7,9 +7,7 @@ import type { ExportedDataState, } from '@excalidraw/excalidraw/types/data/types
 import { exportToSvg, } from '@excalidraw/excalidraw'
 import { animateSvg } from 'excalidraw-animate'
 
-import example from '../data/example.excalidraw'
-
-const Excalidraw: React.FC = () => {
+const Excalidraw: React.FC<{data: ExportedDataState}> = ({data}) => {
 
   const [svg, setSvg] = useState<SVGSVGElement>()
   const [duration, setDuration] = useState<number>()
@@ -23,7 +21,6 @@ const Excalidraw: React.FC = () => {
     (async () => {
 
       // load
-      const data = example as ExportedDataState
       const elements = data.elements.filter((e) => !e.isDeleted)
       const exportOptions = { elements, files: data.files!, appState: data.appState, exportPadding: 30, }
       const svg = await exportToSvg(exportOptions)
