@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useCurrentFrame, interpolate, useVideoConfig } from 'remotion'
 
 import type { NonDeletedExcalidrawElement, } from '@excalidraw/excalidraw/types/element/types'
+import type { ExportedDataState, } from '@excalidraw/excalidraw/types/data/types'
 
 import { exportToSvg, } from '@excalidraw/excalidraw'
 import { animateSvg } from 'excalidraw-animate'
@@ -11,7 +12,7 @@ import example from '../data/example.excalidraw'
 
 const Canvas: React.FC = () => {
 
-  const [svg, setSvg] = useState<SvgItem>()
+  const [svg, setSvg] = useState<SVGSVGElement>()
   const [paused, setPaused] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -21,33 +22,33 @@ const Canvas: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      const data = example as ExcalidrawJson
+      const data = example as ExportedDataState
       const elements = data.elements.filter((e): e is NonDeletedExcalidrawElement => !e.isDeleted)
-      const exportOptions = { elements, files: data.files, appState: data.appState, exportPadding: 30, }
+      const exportOptions = { elements, files: data.files!, appState: data.appState, exportPadding: 30, }
       const svg = await exportToSvg(exportOptions)
-      const result = animateSvg(svg, elements, {})
-      setSvg({ svg, finishedMs: result.finishedMs })
+      animateSvg(svg, elements, {})
+      setSvg(svg)
     })()
   }, [])
 
   useEffect(() => {
     if (svg) {
-      svg.svg.style.width = '100%'
-      svg.svg.style.height = '100%'
-      ref.current?.appendChild(svg.svg)
+      svg.style.width = '100%'
+      svg.style.height = '100%'
+      ref.current?.appendChild(svg)
     }
-    return () => svg?.svg.remove()
+    return () => svg?.remove()
   }, [svg])
 
   const toggleAnimation = () => {
-    if (!paused) svg?.svg.pauseAnimations()
-    else svg?.svg.unpauseAnimations()
+    if (!paused) svg?.pauseAnimations()
+    else svg?.unpauseAnimations()
     setPaused(p => !p)
   }
   
   const stepAnimation = () => {
-    svg?.svg.pauseAnimations()
-    svg?.svg.setCurrentTime(svg?.svg.getCurrentTime() + 0.01)
+    svg?.pauseAnimations()
+    svg?.setCurrentTime(svg?.getCurrentTime() + 0.01)
     setPaused(true)
   }
 
@@ -57,7 +58,7 @@ const Canvas: React.FC = () => {
       <div>
         <button type="button" onClick={() => toggleAnimation()}>{paused ? 'Play' : 'Pause'}</button>
         <button type="button" onClick={() => stepAnimation()}>Step</button>
-        <button type="button" onClick={() => svg?.svg.setCurrentTime(0)}>Reset</button>
+        <button type="button" onClick={() => svg?.setCurrentTime(0)}>Reset</button>
       </div>
       <div style={{ height: '100vh' }} ref={ref}></div>
     </div>
