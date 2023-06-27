@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@remotion/cli": "3.3.102",
+    "browser-fs-access": "^0.34.1",
     "excalidraw-animate": "^0.6.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
