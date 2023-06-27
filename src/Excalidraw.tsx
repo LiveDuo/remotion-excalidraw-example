@@ -9,7 +9,7 @@ import { animateSvg } from 'excalidraw-animate'
 
 import example from '../data/example.excalidraw'
 
-const Canvas: React.FC = () => {
+const Excalidraw: React.FC = () => {
 
   const [svg, setSvg] = useState<SVGSVGElement>()
   const [duration, setDuration] = useState<number>()
@@ -49,4 +49,4 @@ const Canvas: React.FC = () => {
   return <div style={{ height: '100vh' }} ref={ref}></div>
 }
 
-export default Canvas
+export default Excalidraw
