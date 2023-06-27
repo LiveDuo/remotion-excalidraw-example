@@ -12,6 +12,7 @@ import example from '../data/example.excalidraw'
 const Canvas: React.FC = () => {
 
   const [svg, setSvg] = useState<SVGSVGElement>()
+  const [duration, setDuration] = useState<number>()
   const ref = useRef<HTMLDivElement>(null)
 
   const frame = useCurrentFrame()
@@ -34,14 +35,15 @@ const Canvas: React.FC = () => {
       ref.current?.appendChild(svg)
 
       // animate
-      animateSvg(svg, elements, {})
+      const result = animateSvg(svg, elements, {})
+      setDuration(result.finishedMs)
       svg?.pauseAnimations()
+      svg?.setCurrentTime(progress * result.finishedMs / 1000)
     })()
   }, [])
 
   useEffect(() => {
-    const duration = 20 // TODO
-    svg?.setCurrentTime(progress * duration)
+    svg?.setCurrentTime(progress * (duration ?? 1) / 1000)
   }, [progress])
 
   return <div style={{ height: '100vh' }} ref={ref}></div>
