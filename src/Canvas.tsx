@@ -12,7 +12,6 @@ import example from '../data/example.excalidraw'
 const Canvas: React.FC = () => {
 
   const [svg, setSvg] = useState<SVGSVGElement>()
-  const [paused, setPaused] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   const frame = useCurrentFrame()
@@ -36,33 +35,16 @@ const Canvas: React.FC = () => {
 
       // animate
       animateSvg(svg, elements, {})
-
+      svg?.pauseAnimations()
     })()
   }, [])
 
-  const toggleAnimation = () => {
-    if (!paused) svg?.pauseAnimations()
-    else svg?.unpauseAnimations()
-    setPaused(p => !p)
-  }
-  
-  const stepAnimation = () => {
-    svg?.pauseAnimations()
-    svg?.setCurrentTime(svg?.getCurrentTime() + 0.01)
-    setPaused(true)
-  }
+  useEffect(() => {
+    const duration = 20 // TODO
+    svg?.setCurrentTime(progress * duration)
+  }, [progress])
 
-  return (
-    <div>
-      <h1>{progress.toFixed(2)}</h1>
-      <div>
-        <button type="button" onClick={() => toggleAnimation()}>{paused ? 'Play' : 'Pause'}</button>
-        <button type="button" onClick={() => stepAnimation()}>Step</button>
-        <button type="button" onClick={() => svg?.setCurrentTime(0)}>Reset</button>
-      </div>
-      <div style={{ height: '100vh' }} ref={ref}></div>
-    </div>
-  )
+  return <div style={{ height: '100vh' }} ref={ref}></div>
 }
 
 export default Canvas
